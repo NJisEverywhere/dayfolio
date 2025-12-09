@@ -20,9 +20,14 @@ type Log = {
   memo: string;
 };
 
-const locales = {
-  ja: ja,
+type CalendarEvent = {
+  title: string;
+  start: Date;
+  end: Date;
+  log: Log;
 };
+
+const locales = { ja };
 
 const localizer = dateFnsLocalizer({
   format,
@@ -32,22 +37,26 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const handleSelectSlot = (slotInfo: { start: Date }) => {
-    console.log("slotInfo:", slotInfo);
-    setSelectedDate(slotInfo.start);
-    setIsOpen(true);
-  };
+  const [selectedLog, setSelectedLog] = useState<Log | null>(null);
+
   const [title, setTitle] = useState("");
   const [weight, setWeight] = useState<number | null>(null);
   const [reps, setReps] = useState<number | null>(null);
   const [sets, setSets] = useState<number | null>(null);
   const [memo, setMemo] = useState("");
+
   const [logs, setLogs] = useState<Log[]>([]);
 
+  const handleSelectSlot = (slotInfo: { start: Date }) => {
+    setSelectedLog(null);
+    setSelectedDate(slotInfo.start);
+    resetForm();
+    setIsOpen(true);
+  };
 
   const resetForm = () => {
     setTitle("");
@@ -57,10 +66,10 @@ export default function Home() {
     setMemo("");
   };
 
-  const saveLog=() => {
+  const saveLog = () => {
     if (!selectedDate) return;
 
-    const newLog: Log = {
+    const logData: Log = {
       date: selectedDate,
       title,
       weight,
@@ -68,28 +77,51 @@ export default function Home() {
       sets,
       memo,
     };
-    setLogs((prev) => [...prev, newLog]);
+
+    if (selectedLog) {
+      // 編集
+      setLogs((prev) =>
+        prev.map((log) => (log === selectedLog ? logData : log))
+      );
+    } else {
+      // 新規
+      setLogs((prev) => [...prev, logData]);
+    }
+
+    setSelectedLog(null);
     setIsOpen(false);
     resetForm();
   };
 
-
-
-  console.log("isOpen:", isOpen);
+  const events = logs.map((log) => ({
+    title: log.title,
+    start: new Date(log.date),
+    end: new Date(log.date),
+    log,
+  }));
 
   return (
     <>
       <div style={{ height: "100vh", padding: 16 }}>
         <Calendar
           localizer={localizer}
-          events={[]}
+          events={events}
           startAccessor="start"
           endAccessor="end"
           views={["month"]}
-          selectable={true}
+          selectable
           locale="ja"
-          longPressThreshold={1}
           onSelectSlot={handleSelectSlot}
+          onSelectEvent={(event: CalendarEvent) => {
+            setSelectedLog(event.log);
+            setSelectedDate(event.log.date);
+            setTitle(event.log.title);
+            setWeight(event.log.weight);
+            setReps(event.log.reps);
+            setSets(event.log.sets);
+            setMemo(event.log.memo ?? "");
+            setIsOpen(true);
+          }}
         />
       </div>
 
@@ -100,85 +132,71 @@ export default function Home() {
               position: "fixed",
               inset: 0,
               backgroundColor: "rgba(0, 0, 0, 0.5)",
-              zIndex: 9998,
             }}
           />
 
           <Dialog.Content
             style={{
-            background: "white",
-            borderRadius: 8,
-            padding: 20,
-            width: "90%",
-            maxWidth: 400,
-            position: "fixed",
-            top: "20vh",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 999999,
+              background: "white",
+              borderRadius: 8,
+              padding: 20,
+              width: "90%",
+              maxWidth: 400,
+              position: "fixed",
+              top: "20vh",
+              left: "50%",
+              transform: "translateX(-50%)",
             }}
           >
-
-            <Dialog.Title
-              style={{ margin: 0, fontWeight: "bold", fontSize: 18 }}
-            >
-              {selectedDate
-                ? selectedDate.toLocaleDateString("ja-JP")
-                : "日付が選択されていません"}
+            <Dialog.Title style={{ fontWeight: "bold", fontSize: 18 }}>
+              {selectedDate?.toLocaleDateString("ja-JP")}
             </Dialog.Title>
 
             <label>種目名</label>
             <input
               type="text"
               value={title}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
-              onChange={(e)=>setTitle(e.target.value)}
+              onChange={(e) => setTitle(e.target.value)}
             />
 
             <label>重量(kg)</label>
             <input
               type="number"
               value={weight ?? ""}
-              onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : null)}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
+              onChange={(e) =>
+                setWeight(e.target.value ? Number(e.target.value) : null)
+              }
             />
 
             <label>レップ数</label>
             <input
               type="number"
               value={reps ?? ""}
-              onChange={(e) => setReps(e.target.value ? parseInt(e.target.value) : null)}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
+              onChange={(e) =>
+                setReps(e.target.value ? Number(e.target.value) : null)
+              }
             />
 
             <label>セット数</label>
             <input
               type="number"
               value={sets ?? ""}
-              onChange={(e) => setSets(e.target.value ? parseInt(e.target.value) : null)}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
+              onChange={(e) =>
+                setSets(e.target.value ? Number(e.target.value) : null)
+              }
             />
 
             <label>メモ</label>
             <textarea
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
             />
 
-            <button onClick={saveLog}>保存</button>
+            <button onClick={saveLog}>
+              {selectedLog ? "更新" : "保存"}
+            </button>
 
-            <Dialog.Close
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                cursor: "pointer",
-                background: "none",
-                border: "none",
-                fontSize: 16,
-              }}
-            >
+            <Dialog.Close style={{ position: "absolute", top: 10, right: 10 }}>
               ×
             </Dialog.Close>
           </Dialog.Content>
