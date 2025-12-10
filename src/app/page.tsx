@@ -11,6 +11,9 @@ import { ja } from "date-fns/locale";
 import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 
+/* ---------------------------
+    // 型定義
+---------------------------- */
 type Log = {
   date: Date;
   title: string;
@@ -20,10 +23,17 @@ type Log = {
   memo: string;
 };
 
-const locales = {
-  ja: ja,
+type CalendarEvent = {
+  title: string;
+  start: Date;
+  end: Date;
+  log: Log;
 };
 
+/* ---------------------------
+  カレンダーのロケール設定
+---------------------------- */
+const locales = { ja };
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -32,23 +42,27 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-
+/* ---------------------------
+  メインコンポーネント
+---------------------------- */
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const handleSelectSlot = (slotInfo: { start: Date }) => {
-    console.log("slotInfo:", slotInfo);
-    setSelectedDate(slotInfo.start);
-    setIsOpen(true);
-  };
+  const [selectedLog, setSelectedLog] = useState<Log | null>(null);
+
+  const [logs, setLogs] = useState<Log[]>([]);
+
+  /* 入力フォーム */
   const [title, setTitle] = useState("");
   const [weight, setWeight] = useState<number | null>(null);
   const [reps, setReps] = useState<number | null>(null);
   const [sets, setSets] = useState<number | null>(null);
   const [memo, setMemo] = useState("");
-  const [logs, setLogs] = useState<Log[]>([]);
 
-
+  /* ---------------------------
+      フォームリセット
+  ---------------------------- */
   const resetForm = () => {
     setTitle("");
     setWeight(null);
@@ -57,10 +71,40 @@ export default function Home() {
     setMemo("");
   };
 
-  const saveLog=() => {
+  /* ---------------------------
+      新規作成モードを開始
+  ---------------------------- */
+  const startCreateLog = (date: Date) => {
+    setSelectedLog(null);
+    setSelectedDate(date);
+    resetForm();
+    setIsOpen(true);
+  };
+
+  /* ---------------------------
+      編集モードを開始
+  ---------------------------- */
+  const startEditLog = (log: Log) => {
+    setSelectedLog(log);
+    setSelectedDate(log.date);
+
+    // フォームに値をセット
+    setTitle(log.title);
+    setWeight(log.weight);
+    setReps(log.reps);
+    setSets(log.sets);
+    setMemo(log.memo);
+
+    setIsOpen(true);
+  };
+
+  /* ---------------------------
+      保存処理（新規 or 編集）
+  ---------------------------- */
+  const applySave = () => {
     if (!selectedDate) return;
 
-    const newLog: Log = {
+    const updatedLog: Log = {
       date: selectedDate,
       title,
       weight,
@@ -68,117 +112,118 @@ export default function Home() {
       sets,
       memo,
     };
-    setLogs((prev) => [...prev, newLog]);
-    setIsOpen(false);
+
+    if (selectedLog) {
+      // 編集
+      setLogs((prev) =>
+        prev.map((log) =>
+          log.date.getTime() === selectedLog.date.getTime() ? updatedLog : log
+        )
+      );
+    } else {
+      // 新規追加
+      setLogs((prev) => [...prev, updatedLog]);
+    }
+
+    setSelectedLog(null);
     resetForm();
+    setIsOpen(false);
   };
 
-
-
-  console.log("isOpen:", isOpen);
+  /* ---------------------------
+      カレンダーに渡すイベント
+  ---------------------------- */
+  const events = logs.map((log) => ({
+    title: log.title,
+    start: log.date,
+    end: log.date,
+    log,
+  }));
 
   return (
     <>
+      {/* カレンダー本体 */}
       <div style={{ height: "100vh", padding: 16 }}>
         <Calendar
           localizer={localizer}
-          events={[]}
+          events={events}
           startAccessor="start"
           endAccessor="end"
           views={["month"]}
-          selectable={true}
-          locale="ja"
-          longPressThreshold={1}
-          onSelectSlot={handleSelectSlot}
+          selectable
+          onSelectSlot={(slot) => startCreateLog(slot.start)}
+          onSelectEvent={(event: CalendarEvent) => startEditLog(event.log)}
         />
       </div>
 
+      {/* モーダル */}
       <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
         <Dialog.Portal>
           <Dialog.Overlay
             style={{
               position: "fixed",
               inset: 0,
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              zIndex: 9998,
+              backgroundColor: "rgba(0,0,0,0.5)",
             }}
           />
-
           <Dialog.Content
             style={{
-            background: "white",
-            borderRadius: 8,
-            padding: 20,
-            width: "90%",
-            maxWidth: 400,
-            position: "fixed",
-            top: "20vh",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 999999,
+              background: "white",
+              borderRadius: 8,
+              padding: 20,
+              width: "90%",
+              maxWidth: 400,
+              position: "fixed",
+              top: "20vh",
+              left: "50%",
+              transform: "translateX(-50%)",
             }}
           >
-
-            <Dialog.Title
-              style={{ margin: 0, fontWeight: "bold", fontSize: 18 }}
-            >
-              {selectedDate
-                ? selectedDate.toLocaleDateString("ja-JP")
-                : "日付が選択されていません"}
+            <Dialog.Title style={{ fontWeight: "bold", marginBottom: 10 }}>
+              {selectedDate?.toLocaleDateString("ja-JP")}
             </Dialog.Title>
 
             <label>種目名</label>
-            <input
-              type="text"
-              value={title}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
-              onChange={(e)=>setTitle(e.target.value)}
-            />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} />
 
-            <label>重量(kg)</label>
+            <label>重量</label>
             <input
               type="number"
               value={weight ?? ""}
-              onChange={(e) => setWeight(e.target.value ? parseFloat(e.target.value) : null)}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
+              onChange={(e) =>
+                setWeight(e.target.value ? Number(e.target.value) : null)
+              }
             />
 
-            <label>レップ数</label>
+            <label>レップ</label>
             <input
               type="number"
               value={reps ?? ""}
-              onChange={(e) => setReps(e.target.value ? parseInt(e.target.value) : null)}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
+              onChange={(e) =>
+                setReps(e.target.value ? Number(e.target.value) : null)
+              }
             />
 
-            <label>セット数</label>
+            <label>セット</label>
             <input
               type="number"
               value={sets ?? ""}
-              onChange={(e) => setSets(e.target.value ? parseInt(e.target.value) : null)}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
+              onChange={(e) =>
+                setSets(e.target.value ? Number(e.target.value) : null)
+              }
             />
 
             <label>メモ</label>
             <textarea
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-              style={{ width: "100%", marginTop: 5, marginBottom: 15 }}
-            />
+            ></textarea>
 
-            <button onClick={saveLog}>保存</button>
+            <button onClick={applySave}>
+              {selectedLog ? "更新" : "保存"}
+            </button>
 
-            <Dialog.Close
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                cursor: "pointer",
-                background: "none",
-                border: "none",
-                fontSize: 16,
-              }}
-            >
+            <Dialog.Close style={{ position: "absolute", top: 10, right: 10 }}>
               ×
             </Dialog.Close>
           </Dialog.Content>
