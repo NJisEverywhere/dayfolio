@@ -7,6 +7,9 @@ import parse from "date-fns/parse";
 import startOfWeek from "date-fns/startOfWeek";
 import getDay from "date-fns/getDay";
 import { ja } from "date-fns/locale";
+import Input from "@/app/components/UI/Input";
+import Button from "@/app/components/UI/Button";
+import TextArea from "@/app/components/UI/TextArea";
 
 import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -21,6 +24,7 @@ type Log = {
   reps: number | null;
   sets: number | null;
   memo: string;
+  id?: string;
 };
 
 type CalendarEvent = {
@@ -130,6 +134,18 @@ export default function Home() {
     setIsOpen(false);
   };
 
+  // 削除機能
+  const deleteLog = () => {
+    if (!selectedLog) return;
+    
+    setLogs((prev) =>
+      prev.filter((log) => log.date.getTime() !== selectedLog.date.getTime())
+    );
+
+    setSelectedLog(null);
+    resetForm();
+    setIsOpen(false);
+  };
   /* ---------------------------
       カレンダーに渡すイベント
   ---------------------------- */
@@ -174,9 +190,14 @@ export default function Home() {
               width: "90%",
               maxWidth: 400,
               position: "fixed",
-              top: "20vh",
+              top: "50%",
               left: "50%",
-              transform: "translateX(-50%)",
+              transform: "translate(-50%, -50%)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              zIndex: 10000,
+              boxSizing: "border-box",
             }}
           >
             <Dialog.Title style={{ fontWeight: "bold", marginBottom: 10 }}>
@@ -184,10 +205,10 @@ export default function Home() {
             </Dialog.Title>
 
             <label>種目名</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
 
             <label>重量</label>
-            <input
+            <Input
               type="number"
               value={weight ?? ""}
               onChange={(e) =>
@@ -196,7 +217,7 @@ export default function Home() {
             />
 
             <label>レップ</label>
-            <input
+            <Input
               type="number"
               value={reps ?? ""}
               onChange={(e) =>
@@ -205,7 +226,7 @@ export default function Home() {
             />
 
             <label>セット</label>
-            <input
+            <Input
               type="number"
               value={sets ?? ""}
               onChange={(e) =>
@@ -214,14 +235,19 @@ export default function Home() {
             />
 
             <label>メモ</label>
-            <textarea
+            <TextArea
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
-            ></textarea>
+            ></TextArea>
 
-            <button onClick={applySave}>
+            <Button onClick={applySave}>
               {selectedLog ? "更新" : "保存"}
-            </button>
+            </Button>
+            {selectedLog && (
+              <Button onClick={deleteLog} style={{ color: "red" }}>
+                削除
+              </Button>
+            )}
 
             <Dialog.Close style={{ position: "absolute", top: 10, right: 10 }}>
               ×
