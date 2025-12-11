@@ -2,6 +2,7 @@
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { v4 as uuid } from "uuid";
 import format from "date-fns/format";
 import parse from "date-fns/parse";
 import startOfWeek from "date-fns/startOfWeek";
@@ -11,7 +12,7 @@ import Input from "@/app/components/UI/Input";
 import Button from "@/app/components/UI/Button";
 import TextArea from "@/app/components/UI/TextArea";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 
 /* ---------------------------
@@ -64,6 +65,30 @@ export default function Home() {
   const [sets, setSets] = useState<number | null>(null);
   const [memo, setMemo] = useState("");
 
+  useEffect(() => {
+    // ローカルストレージからログを読み込み
+    const storedLogs = localStorage.getItem("dayfolio-workout-logs");
+    if (storedLogs) {
+      const parsedLogs= JSON.parse(storedLogs);
+      // 日付文字列をDateオブジェクトに変換
+      const logsWithDate = parsedLogs.map((log: any) => ({
+        ...log,
+        date: new Date(log.date),
+      }));
+      setLogs(logsWithDate);
+    }
+  }, []);
+
+  useEffect(() => {
+    // ログが更新されるたびにローカルストレージに保存
+    localStorage.setItem("dayfolio-workout-logs", JSON.stringify(logs));
+  }, [logs]);
+
+  // logsの更新時に自動保存する
+  useEffect(() => {
+    localStorage.setItem("dayfolio-workout-logs", JSON.stringify(logs));
+  }, [logs]);
+
   /* ---------------------------
       フォームリセット
   ---------------------------- */
@@ -106,9 +131,29 @@ export default function Home() {
       保存処理（新規 or 編集）
   ---------------------------- */
   const applySave = () => {
-    if (!selectedDate) return;
+  if (!selectedDate) return;
 
-    const updatedLog: Log = {
+  if (selectedLog) {
+    // 更新
+    const updatedLogs = logs.map((log) =>
+      log.id === selectedLog.id
+        ? {
+            ...log,
+            date: selectedDate,
+            title,
+            weight,
+            reps,
+            sets,
+            memo,
+          }
+        : log
+    );
+
+    setLogs(updatedLogs);
+  } else {
+    // 新規追加
+    const newLog: Log = {
+      id: uuid(),
       date: selectedDate,
       title,
       weight,
@@ -117,30 +162,20 @@ export default function Home() {
       memo,
     };
 
-    if (selectedLog) {
-      // 編集
-      setLogs((prev) =>
-        prev.map((log) =>
-          log.date.getTime() === selectedLog.date.getTime() ? updatedLog : log
-        )
-      );
-    } else {
-      // 新規追加
-      setLogs((prev) => [...prev, updatedLog]);
-    }
+    setLogs([...logs, newLog]);
+  }
 
-    setSelectedLog(null);
-    resetForm();
-    setIsOpen(false);
-  };
+  resetForm();
+  setSelectedLog(null);
+  setIsOpen(false);
+};
+
 
   // 削除機能
   const deleteLog = () => {
     if (!selectedLog) return;
     
-    setLogs((prev) =>
-      prev.filter((log) => log.date.getTime() !== selectedLog.date.getTime())
-    );
+    setLogs(logs.filter((log) => log.id !== selectedLog.id) );
 
     setSelectedLog(null);
     resetForm();
