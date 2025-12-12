@@ -25,7 +25,8 @@ type Log = {
   reps: number | null;
   sets: number | null;
   memo: string;
-  id?: string;
+  id: string;
+  calendarId: string;
 };
 
 type CalendarEvent = {
@@ -33,6 +34,14 @@ type CalendarEvent = {
   start: Date;
   end: Date;
   log: Log;
+};
+
+type CalendarType = 'default' | 'workout' | 'study';
+
+type UserCalendar = {
+  id: string;
+  name: string;
+  type: CalendarType;
 };
 
 /* ---------------------------
@@ -52,11 +61,17 @@ const localizer = dateFnsLocalizer({
 ---------------------------- */
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
-
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
-
   const [logs, setLogs] = useState<Log[]>([]);
+  const [activeCalendarId, setActiveCalendarId] = useState<CalendarType>('default');
+
+
+  const Calendars: UserCalendar[] = [
+    { id: 'default', name: '予定管理', type: 'default' },
+    { id: 'workout', name: '筋トレ', type: 'workout' },
+    { id: 'study', name: '学習', type: 'study' },
+  ];
 
   /* 入力フォーム */
   const [title, setTitle] = useState("");
@@ -160,6 +175,7 @@ export default function Home() {
       reps,
       sets,
       memo,
+      calendarId: activeCalendarId,
     };
 
     setLogs([...logs, newLog]);
@@ -184,17 +200,33 @@ export default function Home() {
   /* ---------------------------
       カレンダーに渡すイベント
   ---------------------------- */
-  const events = logs.map((log) => ({
-    title: log.title,
-    start: log.date,
-    end: log.date,
-    log,
+  const events = logs
+    .filter(log => log.calendarId === activeCalendarId)
+    .map((log) => ({
+      title: log.title,
+      start: log.date,
+      end: log.date,
+      log,
   }));
 
   return (
     <>
       {/* カレンダー本体 */}
-      <div style={{ height: "100vh", padding: 16 }}>
+      <div style={{ height: "100vh", padding: 16 }}> 
+        <div style={{ marginBottom: 16 }}>
+          <select
+            value={activeCalendarId}
+            onChange={(e) =>
+              setActiveCalendarId(e.target.value as CalendarType)
+            }
+          >
+            {Calendars.map((cal) => (
+              <option key={cal.id} value={cal.type}>
+                {cal.name}
+              </option>
+            ))}
+          </select>   
+        </div>
         <Calendar
           localizer={localizer}
           events={events}
