@@ -94,11 +94,6 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    // ログが更新されるたびにローカルストレージに保存
-    localStorage.setItem("dayfolio-workout-logs", JSON.stringify(logs));
-  }, [logs]);
-
   // logsの更新時に自動保存する
   useEffect(() => {
     localStorage.setItem("dayfolio-workout-logs", JSON.stringify(logs));
@@ -271,35 +266,54 @@ export default function Home() {
               {selectedDate?.toLocaleDateString("ja-JP")}
             </Dialog.Title>
 
-            <label>種目名</label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+            {activeCalendarId === 'default' && (
+              <>
+                <label>タイトル</label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+              </>
+            )}
 
-            <label>重量</label>
-            <Input
-              type="number"
-              value={weight ?? ""}
-              onChange={(e) =>
-                setWeight(e.target.value ? Number(e.target.value) : null)
-              }
-            />
+            {activeCalendarId === 'workout' && (
+              <>
+                <label>種目名</label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} />
 
-            <label>レップ</label>
-            <Input
-              type="number"
-              value={reps ?? ""}
-              onChange={(e) =>
-                setReps(e.target.value ? Number(e.target.value) : null)
-              }
-            />
+                <label>重量</label>
+                <Input
+                  type="number"
+                  value={weight ?? ""}
+                  onChange={(e) =>
+                    setWeight(e.target.value ? Number(e.target.value) : null)
+                 }
+               />
 
-            <label>セット</label>
-            <Input
-              type="number"
-              value={sets ?? ""}
-              onChange={(e) =>
-                setSets(e.target.value ? Number(e.target.value) : null)
-              }
-            />
+                <label>レップ</label>
+                <Input
+                  type="number"
+                  value={reps ?? ""}
+                  onChange={(e) =>
+                    setReps(e.target.value ? Number(e.target.value) : null)
+                  }
+               />
+
+                <label>セット</label>
+                <Input
+                  type="number"
+                  value={sets ?? ""}
+                  onChange={(e) =>
+                    setSets(e.target.value ? Number(e.target.value) : null)
+                  }
+                />
+              </>
+            )}
+
+            {activeCalendarId === 'study' && (
+              <>
+                <label>学習内容</label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+              </>
+            )}
+            
 
             <label>メモ</label>
             <TextArea
