@@ -65,6 +65,9 @@ export default function Home() {
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
   const [logs, setLogs] = useState<Log[]>([]);
   const [activeCalendarId, setActiveCalendarId] = useState<CalendarType>('default');
+  const [isAllDay, setIsAllDay] = useState<boolean>(true);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
 
   const Calendars: UserCalendar[] = [
@@ -108,6 +111,9 @@ export default function Home() {
     setReps(null);
     setSets(null);
     setMemo("");
+    setIsAllDay(true);
+    setStartDate("");
+    setEndDate("");
   };
 
   /* ---------------------------
@@ -143,13 +149,18 @@ export default function Home() {
   const applySave = () => {
   if (!selectedDate) return;
 
+  const resolveDate = 
+    activeCalendarId === 'default' && startDate 
+      ? new Date(startDate)
+      : selectedDate;
+      
   if (selectedLog) {
     // 更新
     const updatedLogs = logs.map((log) =>
       log.id === selectedLog.id
         ? {
             ...log,
-            date: selectedDate,
+            date: resolveDate,
             title,
             weight,
             reps,
@@ -164,7 +175,7 @@ export default function Home() {
     // 新規追加
     const newLog: Log = {
       id: uuid(),
-      date: selectedDate,
+      date: resolveDate,
       title,
       weight,
       reps,
@@ -270,6 +281,29 @@ export default function Home() {
               <>
                 <label>タイトル</label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={isAllDay}
+                    onChange={(e) => setIsAllDay(e.target.checked)}
+                  />
+                  終日
+                </label>
+
+                <label>開始</label>
+                <input
+                  type={isAllDay ? "date" : "datetime-local"}
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+
+                <label>終了</label>
+                <input
+                  type={isAllDay ? "date" : "datetime-local"}
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />    
               </>
             )}
 
