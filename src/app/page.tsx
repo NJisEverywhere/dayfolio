@@ -331,37 +331,26 @@ export default function Home() {
       <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
         <Dialog.Portal>
           <Dialog.Overlay
-            style={{
-              position: "fixed",
-              inset: 0,
-              backgroundColor: "rgba(0,0,0,0.5)",
-            }}
+            className='fixed inset-0 bg-black/50'
           />
           <Dialog.Content
-            style={{
-              background: "white",
-              borderRadius: 8,
-              padding: 20,
-              width: "90%",
-              maxWidth: 400,
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              zIndex: 10000,
-              boxSizing: "border-box",
-            }}
+            className='
+              fixed left-1/2 top-1/2
+              w-[90%] max-w-md
+              -translate-x-1/2 -translate-y-1/2
+              rounded-xl bg-white shadow-lg
+              p-6
+              flex flex-col gap-6
+              z-50
+            '
           >
-            <Dialog.Title style={{ fontWeight: "bold", marginBottom: 10 }}>
+            <Dialog.Title className='text-lg font-semibold'>
               {selectedDate?.toLocaleDateString("ja-JP")}
             </Dialog.Title>
 
             {activeCalendarId === 'default' && (
-              <>
-                <label>タイトル</label>
+              <div className='space-y-1'>
+                <label className='text-sm text-gray-600'>タイトル</label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} />
 
                 <label>
@@ -386,11 +375,11 @@ export default function Home() {
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                 />    
-              </>
+              </div>
             )}
 
             {activeCalendarId === 'workout' && (
-              <>
+              <div className="space-y-1">
                 <label>種目名</label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} />
 
@@ -420,14 +409,14 @@ export default function Home() {
                     setSets(e.target.value ? Number(e.target.value) : null)
                   }
                 />
-              </>
+              </div>
             )}
 
             {activeCalendarId === 'study' && (
-              <>
+              <div className="space-y-1">
                 <label>学習内容</label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-              </>
+              </div>
             )}
             
 
@@ -446,7 +435,7 @@ export default function Home() {
               </Button>
             )}
 
-            <Dialog.Close style={{ position: "absolute", top: 10, right: 10 }}>
+            <Dialog.Close className='absolute right-4 top-4 text-gray-400 hover:text-gray-600'>
               ×
             </Dialog.Close>
           </Dialog.Content>
