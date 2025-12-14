@@ -19,14 +19,21 @@ import * as Dialog from "@radix-ui/react-dialog";
     // 型定義
 ---------------------------- */
 type Log = {
-  date: Date;
-  title: string;
-  weight: number | null;
-  reps: number | null;
-  sets: number | null;
-  memo: string;
   id: string;
-  calendarId: string;
+  calendarId: CalendarType;
+  title: string;
+  memo: string;
+  
+  // default
+  start?: Date;
+  end?: Date;
+  isAllDay?: boolean;
+  
+  // workout
+  date?: Date;
+  weight?: number|null;
+  reps?: number|null;
+  sets?: number|null;
 };
 
 type CalendarEvent = {
@@ -84,17 +91,28 @@ export default function Home() {
   const [memo, setMemo] = useState("");
 
   useEffect(() => {
-    // ローカルストレージからログを読み込み
     const storedLogs = localStorage.getItem("dayfolio-workout-logs");
-    if (storedLogs) {
-      const parsedLogs= JSON.parse(storedLogs);
-      // 日付文字列をDateオブジェクトに変換
-      const logsWithDate = parsedLogs.map((log: any) => ({
+    if (!storedLogs) return;
+
+    const parsedLogs = JSON.parse(storedLogs);
+
+    const logsWithDate = parsedLogs.map((log: any) => {
+      if (log.calendarId === 'default') {
+        return {
+          ...log,
+          start: new Date(log.start),
+          end: new Date(log.end),
+        };
+      }
+
+      // workout, study
+      return {
         ...log,
         date: new Date(log.date),
-      }));
-      setLogs(logsWithDate);
-    }
+      };
+    });
+
+    setLogs(logsWithDate);
   }, []);
 
   // logsの更新時に自動保存する
@@ -131,14 +149,34 @@ export default function Home() {
   ---------------------------- */
   const startEditLog = (log: Log) => {
     setSelectedLog(log);
-    setSelectedDate(log.date);
 
-    // フォームに値をセット
+    const baseDate = log.calendarId === 'default' ? log.start! : log.date!;
+
+    setSelectedDate(baseDate);
+
     setTitle(log.title);
-    setWeight(log.weight);
-    setReps(log.reps);
-    setSets(log.sets);
     setMemo(log.memo);
+
+    if (log.calendarId === 'default') {
+      const checkAllDay = log.isAllDay ?? false;
+      setIsAllDay(checkAllDay);
+
+      const iso = log.start!.toISOString();
+
+      if (checkAllDay) {
+        setStartDate(iso.slice(0, 10));
+        setEndDate(iso.slice(0, 10));
+      } else {
+        setStartDate(iso.slice(0, 16));
+        setEndDate(iso.slice(0, 16));
+      }
+    }
+
+    if (log.calendarId === 'workout') {
+      setWeight(log.weight ?? null);
+      setReps(log.reps ?? null);
+      setSets(log.sets ?? null);
+    }
 
     setIsOpen(true);
   };
@@ -149,42 +187,75 @@ export default function Home() {
   const applySave = () => {
   if (!selectedDate) return;
 
-  const resolveDate = 
-    activeCalendarId === 'default' && startDate 
-      ? new Date(startDate)
-      : selectedDate;
-      
-  if (selectedLog) {
-    // 更新
-    const updatedLogs = logs.map((log) =>
-      log.id === selectedLog.id
-        ? {
-            ...log,
-            date: resolveDate,
-            title,
-            weight,
-            reps,
-            sets,
-            memo,
-          }
-        : log
-    );
+  if (activeCalendarId === 'default') {
+    if (!startDate || !endDate) {
+      alert("開始日と終了日を入力してください");
+      return;
+    }
 
-    setLogs(updatedLogs);
-  } else {
-    // 新規追加
-    const newLog: Log = {
-      id: uuid(),
-      date: resolveDate,
-      title,
-      weight,
-      reps,
-      sets,
-      memo,
-      calendarId: activeCalendarId,
-    };
+    const start = new Date(startDate);
+    const end = isAllDay ? new Date(endDate) : new Date(endDate);
 
-    setLogs([...logs, newLog]);
+    if (selectedLog) {
+      setLogs(logs.map((log) =>
+        log.id === selectedLog.id
+          ? { ...log, title, start, end, isAllDay, memo }
+          : log
+      ));
+    } else {
+      setLogs([...logs, {
+        id: uuid(),
+        calendarId: 'default',
+        title,
+        start,
+        end,
+        isAllDay,
+        memo,
+      }]);
+    }
+  }
+
+  else if (activeCalendarId === 'workout') {
+    const date = selectedDate;
+
+    if(selectedLog) {
+      setLogs(logs.map((log) =>
+        log.id === selectedLog.id
+          ? { ...log, date, title, weight, reps, sets, memo }
+          : log
+      ));
+    } else {
+      setLogs([...logs, {
+        id: uuid(),
+        calendarId: 'workout',
+        date,
+        title,
+        weight,
+        reps,
+        sets,
+        memo,
+      }]);
+    }
+  }
+
+  else if (activeCalendarId === 'study') {
+    const date = selectedDate;
+
+    if(selectedLog) {
+      setLogs(logs.map((log) =>
+        log.id === selectedLog.id
+          ? { ...log, date, title, memo }
+          : log
+      ));
+    } else {
+      setLogs([...logs, {
+        id: uuid(),
+        calendarId: 'study',
+        date,
+        title,
+        memo,
+      }]);
+    }
   }
 
   resetForm();
@@ -208,12 +279,23 @@ export default function Home() {
   ---------------------------- */
   const events = logs
     .filter(log => log.calendarId === activeCalendarId)
-    .map((log) => ({
-      title: log.title,
-      start: log.date,
-      end: log.date,
-      log,
-  }));
+    .map((log) => {
+      if (log.calendarId === 'default') {
+        return {
+          title: log.title,
+          start: log.start!,
+          end: log.end!,
+          log,
+        };
+      }
+
+      return {
+        title: log.title,
+        start: log.date!,
+        end: log.date!,
+        log,
+      };
+  });
 
   return (
     <>
