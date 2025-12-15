@@ -2,7 +2,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import Input from "@/components/UI/Input";
 import Button from "@/components/UI/Button";
 import TextArea from "@/components/UI/TextArea";
-import type { Log, CalendarType } from "@/app/page";
+import type { Log, CalendarType } from "@/types/log";
 
 
 type LogModalProps = {
@@ -86,10 +86,10 @@ export default function LogModal(props: LogModalProps) {
 
           {activeCalendarId === 'default' && (
             <div className='space-y-1'>
-              <label className='text-sm text-gray-600'>タイトル</label>
+              <label className='text-sm text-gray-500 mb-1 block'>タイトル</label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} />
 
-              <label>
+              <label className='text-sm text-gray-500 mb-1 block'>
                 <input
                   type="checkbox"
                   checked={isAllDay}
@@ -98,14 +98,14 @@ export default function LogModal(props: LogModalProps) {
                 終日
               </label>
 
-              <label>開始</label>
+              <label className='text-sm text-gray-500 mb-1 block'>開始</label>
               <input
                 type={isAllDay ? "date" : "datetime-local"}
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
 
-              <label>終了</label>
+              <label className='text-sm text-gray-500 mb-1 block'>終了</label>
               <input
                 type={isAllDay ? "date" : "datetime-local"}
                 value={endDate}
@@ -116,10 +116,10 @@ export default function LogModal(props: LogModalProps) {
 
           {activeCalendarId === 'workout' && (
             <div className="space-y-1">
-              <label>種目名</label>
+              <label className='text-sm text-gray-500 mb-1 block'>種目名</label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} />
 
-              <label>重量</label>
+              <label className='text-sm text-gray-500 mb-1 block'>重量</label>
               <Input
                 type="number"
                 value={weight ?? ""}
@@ -128,7 +128,7 @@ export default function LogModal(props: LogModalProps) {
                 }
               />
 
-              <label>レップ</label>
+              <label className='text-sm text-gray-500 mb-1 block'>レップ</label>
               <Input
                 type="number"
                 value={reps ?? ""}
@@ -137,7 +137,7 @@ export default function LogModal(props: LogModalProps) {
                 }
               />
 
-              <label>セット</label>
+              <label className='text-sm text-gray-500 mb-1 block'>セット</label>
               <Input
                 type="number"
                 value={sets ?? ""}
@@ -150,13 +150,13 @@ export default function LogModal(props: LogModalProps) {
 
           {activeCalendarId === 'study' && (
             <div className="space-y-1">
-              <label>学習内容</label>
+              <label className='text-sm text-gray-500 mb-1 block'>学習内容</label>
               <Input value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
           )}
           
 
-          <label>メモ</label>
+          <label className='text-sm text-gray-500 mb-1 block'>メモ</label>
           <TextArea
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
@@ -177,4 +177,6 @@ export default function LogModal(props: LogModalProps) {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
 

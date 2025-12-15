@@ -11,42 +11,13 @@ import { ja } from "date-fns/locale";
 
 import { use, useEffect, useState } from "react";
 import LogModal from "@/components/UI/logModal";
+import type { Log, CalendarType } from "@/types/log";
+import type { UserCalendar } from "@/types/calendar";
+import type { CalendarEvent } from "@/types/event";
 
-/* ---------------------------
-    // 型定義
----------------------------- */
-type Log = {
-  id: string;
-  calendarId: CalendarType;
-  title: string;
-  memo: string;
-  
-  // default
-  start?: Date;
-  end?: Date;
-  isAllDay?: boolean;
-  
-  // workout
-  date?: Date;
-  weight?: number|null;
-  reps?: number|null;
-  sets?: number|null;
-};
 
-type CalendarEvent = {
-  title: string;
-  start: Date;
-  end: Date;
-  log: Log;
-};
 
-type CalendarType = 'default' | 'workout' | 'study';
 
-type UserCalendar = {
-  id: string;
-  name: string;
-  type: CalendarType;
-};
 
 /* ---------------------------
   カレンダーのロケール設定
