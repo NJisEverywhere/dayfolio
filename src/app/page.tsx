@@ -59,7 +59,7 @@ export default function Home() {
   const [memo, setMemo] = useState("");
 
   useEffect(() => {
-    const storedLogs = localStorage.getItem("dayfolio-workout-logs");
+    const storedLogs = localStorage.getItem('dayfolio-logs');
     if (!storedLogs) return;
 
     const parsedLogs = JSON.parse(storedLogs);
@@ -85,7 +85,7 @@ export default function Home() {
 
   // logsの更新時に自動保存する
   useEffect(() => {
-    localStorage.setItem("dayfolio-workout-logs", JSON.stringify(logs));
+    localStorage.setItem('dayfolio-logs', JSON.stringify(logs));
   }, [logs]);
 
   /* ---------------------------
@@ -118,7 +118,7 @@ export default function Home() {
   const startEditLog = (log: Log) => {
     setSelectedLog(log);
 
-    const baseDate = log.calendarId === 'default' ? log.start! : log.date!;
+    const baseDate = log.calendarId === 'default' ? log.start : log.date;
 
     setSelectedDate(baseDate);
 
@@ -129,7 +129,7 @@ export default function Home() {
       const checkAllDay = log.isAllDay ?? false;
       setIsAllDay(checkAllDay);
 
-      const iso = log.start!.toISOString();
+      const iso = log.start.toISOString();
 
       if (checkAllDay) {
         setStartDate(iso.slice(0, 10));
@@ -247,22 +247,22 @@ export default function Home() {
   /* ---------------------------
       カレンダーに渡すイベント
   ---------------------------- */
-  const events = logs
+  const events: CalendarEvent[] = logs
     .filter(log => log.calendarId === activeCalendarId)
     .map((log) => {
       if (log.calendarId === 'default') {
         return {
           title: log.title,
-          start: log.start!,
-          end: log.end!,
+          start: log.start,
+          end: log.end,
           log,
         };
       }
 
       return {
         title: log.title,
-        start: log.date!,
-        end: log.date!,
+        start: log.date,
+        end: log.date,
         log,
       };
   });
