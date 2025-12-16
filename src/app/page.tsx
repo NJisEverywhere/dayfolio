@@ -14,7 +14,7 @@ import LogModal from "@/components/UI/logModal";
 import type { Log, CalendarType } from "@/types/log";
 import type { UserCalendar } from "@/types/calendar";
 import type { CalendarEvent } from "@/types/event";
-
+import
 
 
 
@@ -59,33 +59,12 @@ export default function Home() {
   const [memo, setMemo] = useState("");
 
   useEffect(() => {
-    const storedLogs = localStorage.getItem('dayfolio-logs');
-    if (!storedLogs) return;
-
-    const parsedLogs = JSON.parse(storedLogs);
-
-    const logsWithDate = parsedLogs.map((log: any) => {
-      if (log.calendarId === 'default') {
-        return {
-          ...log,
-          start: new Date(log.start),
-          end: new Date(log.end),
-        };
-      }
-
-      // workout, study
-      return {
-        ...log,
-        date: new Date(log.date),
-      };
-    });
-
-    setLogs(logsWithDate);
+    setLogs(loadLogs());
   }, []);
 
   // logsの更新時に自動保存する
   useEffect(() => {
-    localStorage.setItem('dayfolio-logs', JSON.stringify(logs));
+    saveLogs(logs);
   }, [logs]);
 
   /* ---------------------------
