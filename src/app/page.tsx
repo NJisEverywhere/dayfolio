@@ -155,7 +155,9 @@ export default function Home() {
   const applySave = () => {
   if (!selectedDate) return;
 
-  if (activeCalendarId === 'default') {
+  const targetCalendarId = selectedLog ? selectedLog.calendarId : activeCalendarId;
+
+  if (targetCalendarId === 'default') {
     if (!startDate || !endDate) {
       alert("開始日と終了日を入力してください");
       return;
@@ -183,7 +185,7 @@ export default function Home() {
     }
   }
 
-  else if (activeCalendarId === 'workout') {
+  else if (targetCalendarId === 'workout') {
     const date = selectedDate;
 
     if(selectedLog) {
@@ -206,7 +208,7 @@ export default function Home() {
     }
   }
 
-  else if (activeCalendarId === 'study') {
+  else if (targetCalendarId === 'study') {
     const date = selectedDate;
 
     if(selectedLog) {
