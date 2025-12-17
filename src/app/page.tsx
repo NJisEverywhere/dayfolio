@@ -7,12 +7,11 @@ import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import { use, useEffect, useState } from "react";
 import LogModal from "@/components/UI/logModal";
-import type { Log, CalendarType } from "@/types/log";
+import type { Log } from "@/types/log";
+import { CalendarType } from "@/types/calendar";
 import type { UserCalendar } from "@/types/calendar";
 import type { CalendarEvent } from "@/types/event";
 import { loadLogs, saveLogs } from "@/lib/storage";
-
-
 
 
 /* ---------------------------

@@ -2,7 +2,8 @@ import * as Dialog from "@radix-ui/react-dialog";
 import Input from "@/components/UI/Input";
 import Button from "@/components/UI/Button";
 import TextArea from "@/components/UI/TextArea";
-import type { Log, CalendarType } from "@/types/log";
+import type { Log } from "@/types/log";
+import { CalendarType } from "@/types/calendar";
 
 
 type LogModalProps = {
