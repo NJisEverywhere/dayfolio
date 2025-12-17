@@ -1,3 +1,5 @@
+🔗 Demo: https://dayfolio.vercel.app/
+
 # Dayfolio
 
 複数のカレンダー（予定管理・筋トレ・学習）を切り替えて、
