@@ -14,7 +14,7 @@ import LogModal from "@/components/UI/logModal";
 import type { Log, CalendarType } from "@/types/log";
 import type { UserCalendar } from "@/types/calendar";
 import type { CalendarEvent } from "@/types/event";
-import
+import { loadLogs, saveLogs } from "@/lib/storage";
 
 
 
@@ -57,15 +57,19 @@ export default function Home() {
   const [reps, setReps] = useState<number | null>(null);
   const [sets, setSets] = useState<number | null>(null);
   const [memo, setMemo] = useState("");
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    setLogs(loadLogs());
+    const loaded = loadLogs();
+    setLogs(loaded);
+    setInitialized(true);
   }, []);
 
   // logsの更新時に自動保存する
   useEffect(() => {
+    if (!initialized) return;
     saveLogs(logs);
-  }, [logs]);
+  }, [logs, initialized]);
 
   /* ---------------------------
       フォームリセット
