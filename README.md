@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dayfolio
 
-## Getting Started
+複数のカレンダー（予定管理・筋トレ・学習）を切り替えて、
+日々のログを一元管理できる Web アプリです。
 
-First, run the development server:
+## Features
+- 複数カレンダーの切り替え（予定 / 筋トレ / 学習）
+- ログの作成・編集・削除（CRUD）
+- カレンダー種別ごとに異なる入力 UI
+- localStorage によるデータ永続化
+- 初期ロードと保存処理の安全な制御（useEffect）
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tech Stack
+- Next.js (App Router)
+- React
+- TypeScript
+- react-big-calendar
+- date-fns
+- Radix UI
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Design / Implementation Notes
+- calendarId を discriminated union として扱い、型安全に分岐
+- UI（Modal）と状態管理（page.tsx）を分離
+- localStorage 読み込み・保存処理を lib に切り出し
+- 初期レンダリング時の上書きバグを防ぐガードを実装
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Future Improvements
+- データのバックエンド永続化（DB / API）
+- カレンダーの追加・並び替え
+- グラフ表示（筋トレログの可視化）
