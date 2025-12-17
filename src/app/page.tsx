@@ -3,12 +3,8 @@
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { v4 as uuid } from "uuid";
-import format from "date-fns/format";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
-import getDay from "date-fns/getDay";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ja } from "date-fns/locale";
-
 import { use, useEffect, useState } from "react";
 import LogModal from "@/components/UI/logModal";
 import type { Log, CalendarType } from "@/types/log";
