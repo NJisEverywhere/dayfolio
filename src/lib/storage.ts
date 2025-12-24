@@ -1,4 +1,4 @@
-import type { Log } from "@/domain/types/log";
+import type { Log } from "@/features/types/log";
 
 const STRAGE_KEY = 'dayfolio-logs';
 
