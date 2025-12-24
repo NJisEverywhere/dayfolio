@@ -3,26 +3,30 @@ import { useEffect } from 'react';
 import type { Log } from '@/features/types/log';
 import { CalendarType } from '@/features/types/calendar';
 import { loadLogs, saveLogs } from '@/lib/storage';
+import type { CalendarEvent } from '@/features/types/event';
+import { v4 as uuid } from 'uuid';
+import { set } from 'date-fns';
 
 export const useCalendar = () => {
-
+// 状態管理
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
   const [logs, setLogs] = useState<Log[]>([]);
   const [activeCalendarId, setActiveCalendarId] = useState<CalendarType>('default');
+  const [initialized, setInitialized] = useState(false);
+  
+  /* 入力フォーム */
+  const [title, setTitle] = useState("");
   const [isAllDay, setIsAllDay] = useState<boolean>(true);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
- /* 入力フォーム */
-  const [title, setTitle] = useState("");
   const [weight, setWeight] = useState<number | null>(null);
   const [reps, setReps] = useState<number | null>(null);
   const [sets, setSets] = useState<number | null>(null);
   const [memo, setMemo] = useState("");
-  const [initialized, setInitialized] = useState(false);
 
+  // 初回ロード時にローカルストレージから読み込み
   useEffect(() => {
     const loaded = loadLogs();
     setLogs(loaded);
@@ -34,6 +38,29 @@ export const useCalendar = () => {
     if (!initialized) return;
     saveLogs(logs);
   }, [logs, initialized]);
+
+  /* ---------------------------
+      カレンダーに渡すイベント
+  ---------------------------- */
+  const events: CalendarEvent[] = logs
+    .filter(log => log.calendarId === activeCalendarId)
+    .map((log) => {
+      if (log.calendarId === 'default') {
+        return {
+          title: log.title,
+          start: log.start,
+          end: log.end,
+          log,
+        };
+      }
+
+      return {
+        title: log.title,
+        start: log.date,
+        end: log.date,
+        log,
+      };
+  });
 
 
  /* ---------------------------
@@ -193,25 +220,30 @@ export const useCalendar = () => {
     setIsOpen(false);
   };
 
-   /* ---------------------------
-        カレンダーに渡すイベント
-    ---------------------------- */
-    const events: CalendarEvent[] = logs
-      .filter(log => log.calendarId === activeCalendarId)
-      .map((log) => {
-        if (log.calendarId === 'default') {
-          return {
-            title: log.title,
-            start: log.start,
-            end: log.end,
-            log,
-          };
-        }
+  return {
+    // 全体の状態管理
+    isOpen,
+    setIsOpen,
+    selectedDate,
+    selectedLog,
+    activeCalendarId,
+    setActiveCalendarId,
+    events,
+    // フォームの状態
+    title, setTitle,
+    memo, setMemo,
+    isAllDay, setIsAllDay,
+    startDate, setStartDate,
+    endDate, setEndDate,
+    weight, setWeight,
+    reps, setReps,
+    sets, setSets,
+    // アクション
+    startCreateLog,
+    startEditLog,
+    applySave,
+    deleteLog,
+  };
+};
+
   
-        return {
-          title: log.title,
-          start: log.date,
-          end: log.date,
-          log,
-        };
-    });

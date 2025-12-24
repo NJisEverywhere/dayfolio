@@ -11,8 +11,7 @@ import type { Log } from "@/features/types/log";
 import { CalendarType } from "@/features/types/calendar";
 import type { UserCalendar } from "@/features/types/calendar";
 import type { CalendarEvent } from "@/features/types/event";
-import { loadLogs, saveLogs } from "@/lib/storage";
-
+import { useCalendar } from "@/features/calendar/hooks/useCalendar";
 
 /* ---------------------------
   カレンダーのロケール設定
@@ -30,6 +29,34 @@ const localizer = dateFnsLocalizer({
   メインコンポーネント
 ---------------------------- */
 export default function Home() {
+  /* カレンダー用のフック */
+  const {
+    activeCalendarId,
+    setActiveCalendarId,
+    events,
+    isOpen,
+    setIsOpen,
+    selectedDate,
+    selectedLog,
+    title,
+    setTitle,
+    memo,
+    setMemo,
+    isAllDay,
+    setIsAllDay,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    weight,
+    setWeight,
+    reps,
+    setReps,
+    sets,
+    setSets,
+    applySave,
+    deleteLog,
+  } = useCalendar();
   
   const Calendars: UserCalendar[] = [
     { id: 'default', name: '予定管理', type: 'default' },
