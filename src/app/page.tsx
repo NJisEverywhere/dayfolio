@@ -2,12 +2,9 @@
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { v4 as uuid } from "uuid";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import { use, useEffect, useState } from "react";
 import LogModal from "@/components/log/logModal";
-import type { Log } from "@/features/types/log";
 import { CalendarType } from "@/features/types/calendar";
 import type { UserCalendar } from "@/features/types/calendar";
 import type { CalendarEvent } from "@/features/types/event";
@@ -30,33 +27,7 @@ const localizer = dateFnsLocalizer({
 ---------------------------- */
 export default function Home() {
   /* カレンダー用のフック */
-  const {
-    activeCalendarId,
-    setActiveCalendarId,
-    events,
-    isOpen,
-    setIsOpen,
-    selectedDate,
-    selectedLog,
-    title,
-    setTitle,
-    memo,
-    setMemo,
-    isAllDay,
-    setIsAllDay,
-    startDate,
-    setStartDate,
-    endDate,
-    setEndDate,
-    weight,
-    setWeight,
-    reps,
-    setReps,
-    sets,
-    setSets,
-    applySave,
-    deleteLog,
-  } = useCalendar();
+  const calendar = useCalendar();
   
   const Calendars: UserCalendar[] = [
     { id: 'default', name: '予定管理', type: 'default' },
@@ -66,13 +37,13 @@ export default function Home() {
 
   return (
     <>
-      {/* カレンダー本体 */}
-      <div style={{ height: "100vh", padding: 16 }}> 
+      {/* カレンダー切り替えのセレクトボックス */}
+      <main style={{ height: "100vh", padding: 16 }}> 
         <div style={{ marginBottom: 16 }}>
           <select
-            value={activeCalendarId}
+            value={calendar.activeCalendarId}
             onChange={(e) =>
-              setActiveCalendarId(e.target.value as CalendarType)
+              calendar.setActiveCalendarId(e.target.value as CalendarType)
             }
           >
             {Calendars.map((cal) => (
@@ -82,45 +53,28 @@ export default function Home() {
             ))}
           </select>   
         </div>
-        <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          views={["month"]}
-          selectable
-          onSelectSlot={(slot) => startCreateLog(slot.start)}
-          onSelectEvent={(event: CalendarEvent) => startEditLog(event.log)}
-        />
-      </div>
 
-      <LogModal
+        {/* カレンダー本体 */}
+        <div style={{height: 'calc(100% - 60px)'}}>
+          <Calendar
+            localizer={localizer}
+            events={calendar.events}
+            startAccessor="start"
+            endAccessor="end"
+            views={["month"]}
+            selectable
+            onSelectSlot={(slot) => calendar.startCreateLog(slot.start)}
+            onSelectEvent={(event: CalendarEvent) => calendar.startEditLog(event.log)}
+          />
+        </div> 
+        {/* ログ入力モーダル */}
+        <LogModal 
+          {...calendar}
+          open={calendar.isOpen}
+          onOpenChange={calendar.setIsOpen}
+          />      
+      </main>
 
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        activeCalendarId={activeCalendarId}
-        selectedDate={selectedDate}
-        selectedLog={selectedLog}
-        title={title}
-        setTitle={setTitle}
-        memo={memo}
-        setMemo={setMemo}
-        isAllDay={isAllDay}
-        setIsAllDay={setIsAllDay}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
-        weight={weight}
-        setWeight={setWeight}
-        reps={reps}
-        setReps={setReps}
-        sets={sets}
-        setSets={setSets}
-        applySave={applySave}
-        deleteLog={deleteLog}
-      />
-      
     </>
   );
 }

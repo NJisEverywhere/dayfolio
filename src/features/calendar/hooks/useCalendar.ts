@@ -5,7 +5,6 @@ import { CalendarType } from '@/features/types/calendar';
 import { loadLogs, saveLogs } from '@/lib/storage';
 import type { CalendarEvent } from '@/features/types/event';
 import { v4 as uuid } from 'uuid';
-import { set } from 'date-fns';
 
 export const useCalendar = () => {
 // 状態管理
