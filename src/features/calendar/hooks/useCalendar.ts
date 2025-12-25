@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
-import type { Log } from '@/features/types/log';
-import { CalendarType } from '@/features/types/calendar';
+import type { Log } from '@/features/calendar/types/log';
+import { CalendarType } from '@/features/calendar/types/calendar';
 import { loadLogs, saveLogs } from '@/lib/storage';
-import type { CalendarEvent } from '@/features/types/event';
+import type { CalendarEvent } from '@/features/calendar/types/event';
 import { v4 as uuid } from 'uuid';
 
 export const useCalendar = () => {
-// 状態管理
+  // 状態管理
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);

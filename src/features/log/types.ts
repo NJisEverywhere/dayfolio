@@ -1,4 +1,4 @@
-import { CalendarType } from '../types/calendar';
+import { CalendarType } from '../calendar/types/calendar';
 
 type DefaultLog = {
   calendarId: 'default';

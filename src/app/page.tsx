@@ -4,10 +4,10 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ja } from "date-fns/locale";
-import LogModal from "@/components/log/logModal";
-import { CalendarType } from "@/features/types/calendar";
-import type { UserCalendar } from "@/features/types/calendar";
-import type { CalendarEvent } from "@/features/types/event";
+import LogModal from "@/features/calendar/components/logModal";
+import { CalendarType } from "@/features/calendar/types/calendar";
+import type { UserCalendar } from "@/features/calendar/types/calendar";
+import type { CalendarEvent } from "@/features/calendar/types/event";
 import { useCalendar } from "@/features/calendar/hooks/useCalendar";
 
 /* ---------------------------
