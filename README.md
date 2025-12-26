@@ -22,11 +22,11 @@
 
 ## Design / Implementation Notes
 - calendarId を discriminated union として扱い、型安全に分岐
-- UI（Modal）と状態管理（page.tsx）を分離
+- UIと状態管理・ロジックを完全に分離し、page.tsxを宣言的な状態に維持
 - localStorage 読み込み・保存処理を lib に切り出し
 - 初期レンダリング時の上書きバグを防ぐガードを実装
 
 ## Future Improvements
 - データのバックエンド永続化（DB / API）
 - カレンダーの追加・並び替え
-- グラフ表示（筋トレログの可視化）
+- グラフ表示（筋トレ・学習ログの可視化）
